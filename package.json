@@ -2,9 +2,11 @@
   "name": "webshot-factory",
   "version": "0.1.0",
   "description": "screenshots at scale based on headless chrome",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/declarations/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p ."
   },
   "repository": {
     "type": "git",

@@ -5,10 +5,11 @@
         "moduleResolution": "node",
         "sourceMap": true,
         "declaration": true,
+        "declarationDir": "dist/declarations",
         "removeComments": false,
         "noImplicitAny": false,
         "experimentalDecorators": true,
-        "outDir": "built/",
+        "outDir": "dist/",
         "typeRoots": [
             "./node_modules/@types"
         ],
