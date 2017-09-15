@@ -1,4 +1,3 @@
-import { WorkerConfig } from './../dist/declarations/lib/shot-worker.d';
 import * as _ from 'lodash';
 import * as puppeteer from 'puppeteer';
 import * as Logger from 'log4js';
