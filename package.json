@@ -1,12 +1,13 @@
 {
   "name": "webshot-factory",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "screenshots at scale based on headless chrome",
   "main": "dist/index.js",
   "types": "dist/declarations/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -20,9 +21,10 @@
   "homepage": "https://github.com/ashubham/webshot-factory#readme",
   "dependencies": {
     "bluebird": "^3.5.0",
+    "death": "^1.1.0",
     "eventemitter3": "^2.0.3",
     "lodash": "^4.17.4",
-    "log4js": "^2.3.3",
+    "log4js": "^1.1.1",
     "puppeteer": "^0.10.2"
   },
   "devDependencies": {

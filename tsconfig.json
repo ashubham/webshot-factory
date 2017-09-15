@@ -10,6 +10,7 @@
         "noImplicitAny": false,
         "experimentalDecorators": true,
         "outDir": "dist/",
+        "watch": true,
         "typeRoots": [
             "./node_modules/@types"
         ],
@@ -19,7 +20,7 @@
         ]
     },
     "exclude": [
-        "built",
+        "dist",
         "node_modules",
         "spec/**/*",
         "typings"

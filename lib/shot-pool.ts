@@ -1,28 +1,39 @@
 import { Job, JobQueue } from './job-queue';
-import { ShotWorker } from './shot-worker';
+import { ShotWorker, WorkerConfig } from './shot-worker';
 import * as _ from 'lodash';
+import * as Logger from 'log4js';
+import * as ON_DEATH from 'death';
 
+let _logger = Logger.getLogger("shot-pool");
+_logger.setLevel('INFO');
+
+export interface PoolConfig extends WorkerConfig {
+    concurrency?: number;
+}
 
 let idleWorkers: ShotWorker[] = [];
+let allWorkers: ShotWorker[] = [];
 let jobQueue: JobQueue = new JobQueue();
-let _callbackName: string;
-let _warmerUrl: string;
-let _concurrency: number = 0;
-export async function create(concurrency: number,
-                       callbackName: string = 'callPhantom',
-                       warmerUrl: string) {
-    _callbackName = callbackName;
-    _warmerUrl = warmerUrl;
-    _concurrency = concurrency;
-    return addWorkers(concurrency);
+let opts: PoolConfig;
+let concurrency = 0;
+export async function create(options: PoolConfig) {
+    opts = options;
+    return addWorkers(options.concurrency);
 }
 
 async function addWorkers(numWorkers: number) {
-    let newWorkers = await Promise.all(_.range(numWorkers).map((idx) => {
-        return ShotWorker.create(_concurrency + idx, _callbackName, _warmerUrl);
-    }));
-    idleWorkers.push(...newWorkers);
-    _concurrency += numWorkers;
+    try {
+        let newWorkers = await Promise.all(_.range(numWorkers).map((idx) => {
+            return ShotWorker.create(concurrency + idx , opts);
+        }));
+
+        idleWorkers.push(...newWorkers);
+        allWorkers.push(...newWorkers);
+        concurrency += numWorkers;
+    } catch (e) {
+        _logger.error(e);
+    }
+    
 }
 
 export function getShot(url): Promise<Buffer> {
@@ -39,7 +50,7 @@ export function getShot(url): Promise<Buffer> {
     });
 }
 
-let process = async () => {
+let processJob = async () => {
     if (idleWorkers.length && jobQueue.hasJobs()) {
         let worker: ShotWorker = idleWorkers.pop();
         let job = jobQueue.dequeue();
@@ -50,9 +61,18 @@ let process = async () => {
             job.done(err, null);
         } finally {
             idleWorkers.unshift(worker);
-            process();
+            processJob();
         }
     }
 };
 
-jobQueue.on('process', process);
+jobQueue.on('process', processJob);
+
+ON_DEATH(async () => {
+    _logger.info('Exiting ...', allWorkers.length);
+    await Promise.all(allWorkers.map((worker: ShotWorker) => {
+        console.log(`Exiting Worker ${worker.id}`);
+        return worker.exit();
+    }));
+    process.exit();
+});
