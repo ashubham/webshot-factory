@@ -1,0 +1,35 @@
+{
+  "name": "webshot-factory",
+  "version": "0.1.0",
+  "description": "screenshots at scale based on headless chrome",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashubham/webshot-factory.git"
+  },
+  "author": "ashish.shubham@thoughtspot.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ashubham/webshot-factory/issues"
+  },
+  "homepage": "https://github.com/ashubham/webshot-factory#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "eventemitter3": "^2.0.3",
+    "lodash": "^4.17.4",
+    "log4js": "^2.3.3",
+    "puppeteer": "^0.10.2"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.11",
+    "@types/jasmine": "^2.6.0",
+    "@types/lodash": "^4.14.74",
+    "@types/log4js": "0.0.33",
+    "tslint-eslint-rules": "^4.1.1",
+    "typescript": "^2.5.2",
+    "vrsource-tslint-rules": "^5.1.1"
+  }
+}
