@@ -25,6 +25,7 @@
         "typings"
     ],
     "include": [
-        "lib/"
+        "lib/",
+        "index.ts"
     ]
 }
