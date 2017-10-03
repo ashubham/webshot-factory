@@ -1,6 +1,6 @@
 {
   "name": "webshot-factory",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "screenshots at scale based on headless chrome",
   "main": "dist/index.js",
   "types": "dist/declarations/index.d.ts",
@@ -25,7 +25,7 @@
     "eventemitter3": "^2.0.3",
     "lodash": "^4.17.4",
     "log4js": "^1.1.1",
-    "puppeteer": "^0.10.2"
+    "puppeteer": "^0.11.0"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.11",

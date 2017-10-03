@@ -4,7 +4,6 @@ import * as Logger from 'log4js';
 import * as P from 'bluebird';
 
 let _logger = Logger.getLogger("shot-worker");
-_logger.setLevel('INFO');
 
 export interface WorkerConfig {
     callbackName?: string;

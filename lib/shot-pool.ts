@@ -5,7 +5,6 @@ import * as Logger from 'log4js';
 import * as ON_DEATH from 'death';
 
 let _logger = Logger.getLogger("shot-pool");
-_logger.setLevel('INFO');
 
 export interface PoolConfig extends WorkerConfig {
     concurrency?: number;
