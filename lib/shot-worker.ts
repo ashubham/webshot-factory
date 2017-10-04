@@ -4,6 +4,7 @@ import * as Logger from 'log4js';
 import * as P from 'bluebird';
 
 let _logger = Logger.getLogger("shot-worker");
+const DEBUG_PORT_OFFSET = 9201;
 
 export interface WorkerConfig {
     callbackName?: string;
@@ -14,8 +15,10 @@ export interface WorkerConfig {
 
 export class ShotWorker {
     public creationTime: number;
+    private debugPort: number;
     private browser;
     private page;
+    private pageMemory;
     private shotCallback: (err, buffer: Buffer) => void = _.noop;
     private isBusy: boolean = true;
     constructor(public id: number) {
@@ -24,7 +27,7 @@ export class ShotWorker {
 
     public static async create(idx: number, config: WorkerConfig) {
         let worker = new ShotWorker(idx);
-        worker.init(idx, config.callbackName, config.warmerUrl, config.width, config.height);
+        await worker.init(idx, config.callbackName, config.warmerUrl, config.width, config.height);
         return worker;
     }
 
@@ -34,9 +37,10 @@ export class ShotWorker {
             return P.reject('Worker is already busy');
         }
         let start = (new Date()).valueOf();
+        this.isBusy = true;
         _logger.debug('screenshot url', url);
-        return new P<Buffer>((resolve, reject) => {
-            this.shotCallback = (err, buffer: Buffer) => {
+        return new P<Buffer>(async (resolve, reject) => {
+            this.shotCallback = async (err, buffer: Buffer) => {
                 if (err) {
                     return reject(err);
                 }
@@ -54,22 +58,35 @@ export class ShotWorker {
         this.browser && this.browser.close();
     }
 
+    public getStatus() {
+        return {
+            id: this.id,
+            browser: this.browser,
+            debugPort: this.debugPort,
+            memory: this.pageMemory
+        }
+    }
+
     private async init(idx: number = 0,
                        callbackName: string = 'callPhantom',
                        warmerUrl: string = '',
                        width: number = 800,
                        height: number = 600) {
         let start = (new Date()).valueOf();
+        this.debugPort = DEBUG_PORT_OFFSET + idx; 
         this.browser = await puppeteer.launch({
             ignoreHTTPSErrors: true,
             headless: true,
-            args: ['--ignore-certificate-errors'],
+            args: [
+                '--ignore-certificate-errors',
+                '--enable-precise-memory-info',
+                `--remote-debugging-port=${this.debugPort}`],
             userDataDir: '/tmp/chrome'
         });
         this.page = await this.browser.newPage();
 
-        this.page.on('console', (...args) => _logger.debug('PAGE LOG:', ...args));
-        this.page.on('response', r => _logger.debug(r.status + ' ' + r.url));
+        this.page.on('console', (...args) => _logger.debug(`PAGE LOG Worker #${idx}:`, ...args));
+        this.page.on('response', r => _logger.debug(`Worker #${idx}: ${r.status} ${r.url}`));
         this.page.setViewport({
             width: width,
             height: height
@@ -86,11 +103,15 @@ export class ShotWorker {
             }, (err) => {
                 this.shotCallback(err, null);
                 this.isBusy = false;
+            })
+            .finally(async () => {
+                this.pageMemory = await this.page.evaluate('window.performance.memory');                
             });
         });
 
         if (warmerUrl) {
             await this.page.goto(warmerUrl, { waitUntil: 'networkidle' });
+            this.pageMemory = await this.page.evaluate('window.performance.memory');
         }
 
         _logger.info(`Worker ${idx} ready`);

@@ -49,6 +49,14 @@ export function getShot(url): Promise<Buffer> {
     });
 }
 
+export function getStatus() {
+    return {
+        jobQueue,
+        allWorkers,
+        idleWorkers
+    }
+}
+
 let processJob = async () => {
     if (idleWorkers.length && jobQueue.hasJobs()) {
         let worker: ShotWorker = idleWorkers.pop();

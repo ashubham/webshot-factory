@@ -26,6 +26,7 @@
     ],
     "include": [
         "lib/",
-        "index.ts"
+        "index.ts",
+        "test"
     ]
 }

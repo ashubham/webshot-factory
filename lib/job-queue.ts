@@ -6,6 +6,7 @@ export interface Job {
 
 export class JobQueue extends EventEmitter {
     private jobs: Job[] = [];
+    private totalProcessed: number = 0;
     constructor() {
         super();
     }
@@ -20,10 +21,18 @@ export class JobQueue extends EventEmitter {
     }
 
     public dequeue() {
+        ++this.totalProcessed;
         return this.jobs.shift();
     }
 
     public hasJobs() {
         return this.jobs.length > 0;
+    }
+
+    public getStatus() {
+        return {
+            jobs: this.jobs,
+            total: this.totalProcessed
+        }
     }
 }
