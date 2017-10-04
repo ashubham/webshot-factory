@@ -11,6 +11,7 @@ export interface WorkerConfig {
     warmerUrl?: string;
     width?: number;
     height?: number;
+    timeout?: number;
 }
 
 export class ShotWorker {
@@ -18,7 +19,7 @@ export class ShotWorker {
     private debugPort: number;
     private browser;
     private page;
-    private pageMemory;
+    private timeout: number = 60000;
     private shotCallback: (err, buffer: Buffer) => void = _.noop;
     private isBusy: boolean = true;
     constructor(public id: number) {
@@ -27,7 +28,7 @@ export class ShotWorker {
 
     public static async create(idx: number, config: WorkerConfig) {
         let worker = new ShotWorker(idx);
-        await worker.init(idx, config.callbackName, config.warmerUrl, config.width, config.height);
+        await worker.init(idx, config.callbackName, config.warmerUrl, config.width, config.height, config.timeout);
         return worker;
     }
 
@@ -38,7 +39,7 @@ export class ShotWorker {
         }
         let start = (new Date()).valueOf();
         this.isBusy = true;
-        _logger.debug('screenshot url', url);
+        _logger.debug(`screenshot url #${this.id}: ${url}`);
         return new P<Buffer>(async (resolve, reject) => {
             this.shotCallback = async (err, buffer: Buffer) => {
                 if (err) {
@@ -47,6 +48,11 @@ export class ShotWorker {
                 resolve(buffer);
             };
             this.page.goto(url, { waitUntil: 'networkidle' });
+        })
+        .timeout(this.timeout)
+        .finally(() => {
+            _logger.debug(`Worker #${this.id}: Screenshot Complete.`)
+            this.isBusy = false
         });
     }
 
@@ -63,7 +69,6 @@ export class ShotWorker {
             id: this.id,
             browser: this.browser,
             debugPort: this.debugPort,
-            memory: this.pageMemory,
             isBusy: this.isBusy
         }
     }
@@ -72,9 +77,11 @@ export class ShotWorker {
                        callbackName: string = 'callPhantom',
                        warmerUrl: string = '',
                        width: number = 800,
-                       height: number = 600) {
+                       height: number = 600,
+                       timeout: number = 60000) {
         let start = (new Date()).valueOf();
         this.debugPort = DEBUG_PORT_OFFSET + idx; 
+        this.timeout = timeout;
         this.browser = await puppeteer.launch({
             ignoreHTTPSErrors: true,
             headless: true,
@@ -100,19 +107,13 @@ export class ShotWorker {
                 fullPage: true
             }).then((buffer: Buffer) => {
                 this.shotCallback(null, buffer);
-                this.isBusy = false;
             }, (err) => {
                 this.shotCallback(err, null);
-                this.isBusy = false;
-            })
-            .finally(async () => {
-                this.pageMemory = await this.page.evaluate('window.performance.memory');                
             });
         });
 
         if (warmerUrl) {
             await this.page.goto(warmerUrl, { waitUntil: 'networkidle' });
-            this.pageMemory = await this.page.evaluate('window.performance.memory');
         }
 
         _logger.info(`Worker ${idx} ready`);

@@ -19,7 +19,8 @@ let defaultConfig: Config = {
     callbackName: 'callPhantom',
     warmerUrl: '',
     width: 800,
-    height: 600
+    height: 600,
+    timeout: 60000
 };
 
 export async function init(options: Config) {
