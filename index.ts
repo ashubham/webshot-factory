@@ -37,16 +37,35 @@ app.get('/status', (req, res) => {
     let status = shotPool.getStatus();
     let workerDetails = status.allWorkers.map(worker => {
         let workerStatus = worker.getStatus();
-        return `<div>Worker Id: #${workerStatus.id}<div>
-            <div>ConnectWS: ${workerStatus.browser.wsEndpoint()}<div>
-            <div>DebugLink: <a href='http://${ip}:${workerStatus.debugPort}'>http://${ip}:${workerStatus.debugPort}</a></div>
-            <br>
+        let link = `http://${ip}:${workerStatus.debugPort}`;
+        return `
+            <div class="worker ${workerStatus.isBusy ? 'busy': 'free'}">
+                <div>Worker Id: <b>#${workerStatus.id}</b></div>
+                <div>ConnectWS: ${workerStatus.browser.wsEndpoint()}</div>
+                <div>DebugLink:
+                    <a href='${link}'>
+                        ${link}
+                    </a>
+                </div>
+            </div>
         `;
-    });
+    }).join('');
     res.end(`
         <html>
                 <style>
-                        
+                        .worker {
+                            margin: 10px;
+                            width: 700px;
+                            padding: 10px;
+                            border-radius: 5px;
+                            box-shadow: 2px 2px #d3d3d8;
+                        }
+                        .busy {
+                            background-color: #fff3d4;
+                        }
+                        .free {
+                            background-color: #5fba7d;
+                        }
                 </style>
                 <title>Webshot Factory Status</title>
                 <body>

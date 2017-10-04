@@ -63,7 +63,8 @@ export class ShotWorker {
             id: this.id,
             browser: this.browser,
             debugPort: this.debugPort,
-            memory: this.pageMemory
+            memory: this.pageMemory,
+            isBusy: this.isBusy
         }
     }
 
