@@ -11,7 +11,7 @@ screenshots at scale based on headless chrome.
 - `Webshot-factory` creates a number of headless-chrome worker instances which take screenshots in round robin. Thus, can be horizontally scaled to provide good throughput.
 - Includes a debug status page to monitor the worker instances.
 - Can be used for batch report generation.
-- Or to take a number screenshots in general.
+- Or to take a number of screenshots in general.
 
 ## Installation
 
@@ -44,11 +44,11 @@ await shotFactory.init({
     webshotDebugPort: 3030 // Port where the status page is served.
 });
 
-// Once initialized just call getShot and
+// Once initialized, just call getShot and
 // a shot will be scheduled on a worker
 // chrome instance.
 shotFactory.getShot('http://yahoo.com').then(buffer => {
-    // Do whatever with the buffer, can be used to upload.
+    // Do whatever with the buffer, can be used to email to recipients.
     console.log(buffer);
     // Or can be saved to a file.
     // Using the `fs` module.
@@ -63,6 +63,8 @@ shotFactory.getShot('http://yahoo.com').then(buffer => {
 `Webshot-factory` includes a status page to check the status of the running chrome instance workers.
 
 Visit: `http://<host>:<webshotDebugPort>/status`
+
+Note: The default port is `3030`.
 
 To check the status and debug any problems. The page looks like this:
 
