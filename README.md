@@ -4,7 +4,14 @@
 
 <img src="https://github.com/ashubham/webshot-factory/raw/master/assets/webshot-factory.png" align="right" alt="Webshot Factory" />
 
-screenshots at scale based on headless chrome
+screenshots at scale based on headless chrome.
+
+## Basic Concept
+
+- `Webshot-factory` creates a number of headless-chrome worker instances which take screenshots in round robin. Thus, can be horizontally scaled to provide good throughput.
+- Includes a debug status page to monitor the worker instances.
+- Can be used for batch report generation.
+- Or to take a number screenshots in general.
 
 ## Installation
 
@@ -25,7 +32,8 @@ await shotFactory.init({
     // The callback method to be exposed on the window, 
     // which would be called by the application
     // Shot will be taken when callback is called.
-    callbackName: 'callPhantom',
+    // This was 'callPhantom' in PhantomJS.
+    callbackName: '',
 
     // A cache warmer url, 
     // so that workers can cache the webpage scripts.
@@ -40,7 +48,13 @@ await shotFactory.init({
 // a shot will be scheduled on a worker
 // chrome instance.
 shotFactory.getShot('http://yahoo.com').then(buffer => {
+    // Do whatever with the buffer, can be used to upload.
     console.log(buffer);
+    // Or can be saved to a file.
+    // Using the `fs` module.
+    fs.createWriteStream('shot.png')
+        .write(buffer)
+        .end();
 });
 ```
 
@@ -51,5 +65,7 @@ shotFactory.getShot('http://yahoo.com').then(buffer => {
 Visit: `http://<host>:<webshotDebugPort>/status`
 
 To check the status and debug any problems. The page looks like this:
+
+<img src="https://github.com/ashubham/webshot-factory/raw/master/assets/webshot-debug-page.png" alt="Webshot Factory status" />
 
 

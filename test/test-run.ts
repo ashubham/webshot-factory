@@ -2,7 +2,7 @@ import * as shotFactory from '../index';
 
 shotFactory.init({
     concurrency: 5,
-    callbackName: 'callPhantom',
+    callbackName: '',
     warmerUrl: 'http://google.com',
     width: 1000, // shot width
     height: 600 // shot height

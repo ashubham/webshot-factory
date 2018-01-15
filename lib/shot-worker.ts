@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import * as puppeteer from 'puppeteer';
 import * as Logger from 'log4js';
 import * as P from 'bluebird';
+import { config } from 'bluebird';
 
 let _logger = Logger.getLogger("shot-worker");
 const DEBUG_PORT_OFFSET = 9201;
@@ -22,12 +23,14 @@ export class ShotWorker {
     private timeout: number = 60000;
     private shotCallback: (err, buffer: Buffer) => void = _.noop;
     private isBusy: boolean = true;
+    public config: WorkerConfig;
     constructor(public id: number) {
 
     }
 
     public static async create(idx: number, config: WorkerConfig) {
         let worker = new ShotWorker(idx);
+        worker.config = config;
         await worker.init(idx, config.callbackName, config.warmerUrl, config.width, config.height, config.timeout);
         return worker;
     }
@@ -47,7 +50,18 @@ export class ShotWorker {
                 }
                 resolve(buffer);
             };
-            this.page.goto(url, { waitUntil: 'networkidle' });
+            this.page.goto(url, { 
+                waitUntil: 'networkidle2' 
+            }).then(async () => {
+                if(!this.config.callbackName) {
+                    let buffer = await this.page.screenshot({
+                        fullPage: true
+                    });
+                    this.shotCallback(null, buffer);
+                }
+            }).then(null, (err) => {
+                this.shotCallback(err, null);
+            });
         })
         .timeout(this.timeout)
         .finally(() => {
@@ -74,7 +88,7 @@ export class ShotWorker {
     }
 
     private async init(idx: number = 0,
-                       callbackName: string = 'callPhantom',
+                       callbackName: string = '',
                        warmerUrl: string = '',
                        width: number = 800,
                        height: number = 600,
@@ -101,19 +115,21 @@ export class ShotWorker {
         });
 
         // Define a window.onCustomEvent function on the page.  
-        await this.page.exposeFunction(callbackName, e => {
-            _logger.debug('Callback called from browser with', e);
-            return this.page.screenshot({
-                fullPage: true
-            }).then((buffer: Buffer) => {
-                this.shotCallback(null, buffer);
-            }, (err) => {
-                this.shotCallback(err, null);
+        if(callbackName) {
+            await this.page.exposeFunction(callbackName, e => {
+                _logger.debug('Callback called from browser with', e);
+                return this.page.screenshot({
+                    fullPage: true
+                }).then((buffer: Buffer) => {
+                    this.shotCallback(null, buffer);
+                }, (err) => {
+                    this.shotCallback(err, null);
+                });
             });
-        });
+        }
 
         if (warmerUrl) {
-            await this.page.goto(warmerUrl, { waitUntil: 'networkidle' });
+            await this.page.goto(warmerUrl, { waitUntil: 'networkidle2' });
         }
 
         _logger.info(`Worker ${idx} ready`);

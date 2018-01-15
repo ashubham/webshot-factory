@@ -8,15 +8,17 @@ process.env.webshotDebugPort = process.env.webshotDebugPort || '3030';
 Logger.setGlobalLogLevel(process.env.loglevel);
 let app = express();
 let ip;
+let _logger = Logger.getLogger("index");
+
 internalIp.v4().then(_ip => ip = _ip);
 
 export interface Config extends shotPool.PoolConfig {
-    webshotDebugPort: string;
+    webshotDebugPort?: string;
 }
 
 let defaultConfig: Config = {
     concurrency: 10,
-    callbackName: 'callPhantom',
+    callbackName: '',
     warmerUrl: '',
     width: 800,
     height: 600,
@@ -32,6 +34,8 @@ export async function init(options: Config) {
     await shotPool.create(
         options
     );
+    app.listen(parseInt(passedConfig.webshotDebugPort), ip);
+    _logger.info('Listening on debug port', passedConfig.webshotDebugPort, ip);
     return shotPool;
 }
 
@@ -89,5 +93,3 @@ app.get('/status', (req, res) => {
         </html>
     `)
 });
-
-app.listen(parseInt(passedConfig.webshotDebugPort), ip);
