@@ -12,6 +12,7 @@ screenshots at scale based on headless chrome.
 - Includes a debug status page to monitor the worker instances.
 - Can be used for batch report generation.
 - Or to take a number of screenshots in general.
+- Written in Typescript (types bundled).
 
 ## Installation
 
