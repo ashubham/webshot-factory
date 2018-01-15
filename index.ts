@@ -11,7 +11,7 @@ let ip;
 internalIp.v4().then(_ip => ip = _ip);
 
 export interface Config extends shotPool.PoolConfig {
-
+    webshotDebugPort: string;
 }
 
 let defaultConfig: Config = {
@@ -20,14 +20,19 @@ let defaultConfig: Config = {
     warmerUrl: '',
     width: 800,
     height: 600,
-    timeout: 60000
+    timeout: 60000,
+    webshotDebugPort: process.env.webshotDebugPort
 };
+
+let passedConfig : Config;
 
 export async function init(options: Config) {
     options = Object.assign({}, defaultConfig, options);
-    return shotPool.create(
+    passedConfig = options;
+    await shotPool.create(
         options
     );
+    return shotPool;
 }
 
 export function getShot(url: string): PromiseLike<Buffer> {
@@ -85,4 +90,4 @@ app.get('/status', (req, res) => {
     `)
 });
 
-app.listen(parseInt(process.env.webshotDebugPort), ip);
+app.listen(parseInt(passedConfig.webshotDebugPort), ip);
