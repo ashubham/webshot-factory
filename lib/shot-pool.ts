@@ -31,6 +31,7 @@ async function addWorkers(numWorkers: number) {
         concurrency += numWorkers;
     } catch (e) {
         _logger.error(e);
+	process.exit(1);
     }
     
 }
