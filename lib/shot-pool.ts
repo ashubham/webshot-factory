@@ -30,7 +30,7 @@ async function addWorkers(numWorkers: number) {
         allWorkers.push(...newWorkers);
         concurrency += numWorkers;
     } catch (e) {
-        _logger.error(e);
+        _logger.error("error while adding worker to the queue", e);
 	throw e;
     }
     
@@ -66,6 +66,7 @@ let processJob = async () => {
             let buffer = await worker.takeShot(job.url);
             job.done(null, buffer);
         } catch (err) {
+            _logger.error("error while taking screenshot", err);
             job.done(err, null);
         } finally {
             idleWorkers.unshift(worker);

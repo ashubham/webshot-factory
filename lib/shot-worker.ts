@@ -96,15 +96,21 @@ export class ShotWorker {
         let start = (new Date()).valueOf();
         this.debugPort = DEBUG_PORT_OFFSET + idx; 
         this.timeout = timeout;
-        this.browser = await puppeteer.launch({
-            ignoreHTTPSErrors: true,
-            headless: true,
-            args: [
-                '--ignore-certificate-errors',
-                '--enable-precise-memory-info',
-                `--remote-debugging-port=${this.debugPort}`],
-            userDataDir: '/tmp/chrome'
-        });
+        try {
+            this.browser = await puppeteer.launch({
+                ignoreHTTPSErrors: true,
+                headless: true,
+                args: [
+                    '--ignore-certificate-errors',
+                    '--enable-precise-memory-info',
+                    `--remote-debugging-port=${this.debugPort}`],
+                userDataDir: '/tmp/chrome'
+            });
+            _logger.debug('puppeteer launched');
+        } catch (error) {
+            _logger.error("error launching chrome from puppeteer", error);
+        }
+        
         this.page = await this.browser.newPage();
 
         this.page.on('console', (...args) => _logger.debug(`PAGE LOG Worker #${idx}:`, ...args));
