@@ -94,6 +94,10 @@ export class ShotWorker {
                        height: number = 600,
                        timeout: number = 60000,
                        chromeExecutablePath: string = '') {
+<<<<<<< HEAD
+=======
+        let start = (new Date()).valueOf();
+>>>>>>> 1b28c20... use Puppeteer with a different version of Chrome
         this.debugPort = DEBUG_PORT_OFFSET + idx; 
         this.timeout = timeout;
 
