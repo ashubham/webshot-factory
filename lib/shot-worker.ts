@@ -92,20 +92,34 @@ export class ShotWorker {
                        warmerUrl: string = '',
                        width: number = 800,
                        height: number = 600,
-                       timeout: number = 60000) {
+                       timeout: number = 60000,
+                       chromeExecutablePath: string = '') {
         let start = (new Date()).valueOf();
         this.debugPort = DEBUG_PORT_OFFSET + idx; 
         this.timeout = timeout;
         try {
-            this.browser = await puppeteer.launch({
-                ignoreHTTPSErrors: true,
-                headless: true,
-                args: [
-                    '--ignore-certificate-errors',
-                    '--enable-precise-memory-info',
-                    `--remote-debugging-port=${this.debugPort}`],
-                userDataDir: '/tmp/chrome'
-            });
+            if (!chromeExecutablePath) {
+                this.browser = await puppeteer.launch({
+                    ignoreHTTPSErrors: true,
+                    headless: true,
+                    args: [
+                        '--ignore-certificate-errors',
+                        '--enable-precise-memory-info',
+                        `--remote-debugging-port=${this.debugPort}`],
+                    userDataDir: '/tmp/chrome'
+                });
+            } else {
+                this.browser = await puppeteer.launch({
+                    ignoreHTTPSErrors: true,
+                    headless: true,
+                    args: [
+                        '--ignore-certificate-errors',
+                        '--enable-precise-memory-info',
+                        `--remote-debugging-port=${this.debugPort}`],
+                    userDataDir: '/tmp/chrome',
+                    executablePath: chromeExecutablePath
+                });
+            }
             _logger.debug('puppeteer launched');
         } catch (error) {
             _logger.error("error launching chrome from puppeteer", error);
