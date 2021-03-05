@@ -43,6 +43,8 @@ await shotFactory.init({
     height: 600, // shot height
     timeout: 60000, // timeout (millis) to wait for shot.
     webshotDebugPort: 3030 // Port where the status page is served.
+    // To use Puppeteer with a different version of Chrome or Chromium,
+    chromeExecutablePath: '/path/to/Chrome'
 });
 
 // Once initialized, just call getShot and
