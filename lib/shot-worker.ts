@@ -92,20 +92,27 @@ export class ShotWorker {
                        warmerUrl: string = '',
                        width: number = 800,
                        height: number = 600,
-                       timeout: number = 60000) {
-        let start = (new Date()).valueOf();
+                       timeout: number = 60000,
+                       chromeExecutablePath: string = '') {
         this.debugPort = DEBUG_PORT_OFFSET + idx; 
         this.timeout = timeout;
+
+        let start = (new Date()).valueOf();
+        let options: any = {
+            ignoreHTTPSErrors: true,
+            headless: true,
+            args: [
+                '--ignore-certificate-errors',
+                '--enable-precise-memory-info',
+                `--remote-debugging-port=${this.debugPort}`],
+            userDataDir: '/tmp/chrome'
+        };
+        if (chromeExecutablePath) {
+            options.executablePath = chromeExecutablePath
+        }
+
         try {
-            this.browser = await puppeteer.launch({
-                ignoreHTTPSErrors: true,
-                headless: true,
-                args: [
-                    '--ignore-certificate-errors',
-                    '--enable-precise-memory-info',
-                    `--remote-debugging-port=${this.debugPort}`],
-                userDataDir: '/tmp/chrome'
-            });
+            this.browser = await puppeteer.launch(options);
             _logger.debug('puppeteer launched');
         } catch (error) {
             _logger.error("error launching chrome from puppeteer", error);

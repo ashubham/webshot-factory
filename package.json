@@ -1,6 +1,6 @@
 {
   "name": "webshot-factory",
-  "version": "0.5.3",
+  "version": "0.5.5",
   "description": "screenshots at scale based on headless chrome",
   "main": "dist/index.js",
   "types": "dist/declarations/index.d.ts",
